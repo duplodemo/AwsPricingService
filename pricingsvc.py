@@ -10,6 +10,7 @@ import logging
 import json
 import requests
 import sys
+import os
 from logging import handlers, Formatter
 
 app = Flask(__name__)
@@ -70,7 +71,7 @@ def updatePriceCacheThread():
         time.sleep(6000)
 
 def setLogger():
-    logFile = "/var/log/AwsPricingSvc.log" 
+    logFile = "log/AwsPricingSvc.log"
     logger = logging.getLogger('AwsPricingSvc')
 
     fh = handlers.RotatingFileHandler(logFile, maxBytes=5000000, backupCount=5)
@@ -101,15 +102,19 @@ def setLogger():
 def main():
     global logger
     logger = setLogger()
-
-    logger.debug('Launching Pricing update Thread')
-    thread = Thread(target = updatePriceCacheThread, args = [])
-    thread.setDaemon(True)
-    thread.start()    
+    global refresh_timer
+    refresh_timer = os.getenv('REFRESH_TIMER', None)
+    if refresh_timer is not None:
+        logger.debug('Launching Pricing update Thread')
+        thread = Thread(target = updatePriceCacheThread, args = [])
+        thread.setDaemon(True)
+        thread.start()
+    else:
+        logger.debug('One time cache update')
+        updatePriceCache()
     # logger.debug('No thread version')
     # updatePriceCache()
     # findPrice()
-     
     app.run(host='0.0.0.0', port=8000, debug=True, use_reloader=False)
 
 
