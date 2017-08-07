@@ -67,7 +67,7 @@ def updatePriceCacheThread():
             logger.error(err)
 
         logger.debug('================================= updatePriceCacheThread completed')
-        time.sleep(60)
+        time.sleep(6000)
 
 def setLogger():
     logFile = "/var/log/AwsPricingSvc.log" 
@@ -80,13 +80,19 @@ def setLogger():
     logger.addHandler(fh)
     logger.setLevel(logging.DEBUG)
 
+    ch = logging.StreamHandler(sys.stdout)
+    ch.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    ch.setFormatter(formatter)
+    logger.addHandler(ch)
+
     #
     # Detach stdout, stdin and stderr for daemonizing 
     #
-    f = open('/dev/null', 'w')
-    sys.stdout = f
-    sys.stderr = f
-    sys.stdin.close()
+    #    f = open('/dev/null', 'w')
+    #sys.stdout = f
+    #sys.stderr = f
+    #sys.stdin.close()
 
     logger.debug('stdout/stderr redirected to /dev/null ...')
 
@@ -109,4 +115,5 @@ def main():
 
 if __name__ == '__main__':
    main()
+
 
